@@ -4,7 +4,7 @@
     <div class="surface-card p-4 shadow-2 border-round w-full lg:w-6">
         <div class="text-center mb-5">
             <!-- <img src="" alt="Image" height="50" class="mb-3" /> -->
-            <div class="text-900 text-3xl font-medium mb-3">Добро пожаловать</div>
+            <div class="text-900 text-3xl font-medium mb-3">Добро пожаловать!</div>
             <span class="text-600 font-medium line-height-3">Нет аккаунта?</span>
             <a class="font-medium no-underline ml-2 text-blue-500 cursor-pointer">Зарегистрируйтесь!</a>
         </div>
