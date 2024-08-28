@@ -1,32 +1,55 @@
 version: "3.9"
 
 services:
-  regback:
-    container_name: regback
-    build: ./back
-    command: python reguser/manage.py runserver 0.0.0.0:8000
+  back_accounts:
+    container_name: back_accounts
+    build: ./back_accounts
+    # command: python reguser/manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     environment:
       - PG_USER=postgres
       - PG_PASSWORD=postgres
-      - PG_DB=postgres
+      - PG_DB=users
       - PG_PORT=5432
-      - PG_HOST=db
+      - PG_HOST=db_users
     tty: true
     restart: always
     depends_on:
-      - db
+      - db_users
     networks:
       - net
     volumes:
-      - ./back:/app
+      - ./back_accounts:/app
+  
+  back_products:
+    container_name: back_products
+    build: ./back_products
+    # command: python reguser/manage.py runserver 0.0.0.0:8000
+    # command: python manage.py launch_queue_listener
+    ports:
+      - "8001:8000"
+    environment:
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_DB=products
+      - PG_PORT=5432
+      - PG_HOST=db_products
+    tty: true
+    restart: always
+    depends_on:
+      - db_users
+      - kafka
+    networks:
+      - net
+    volumes:
+      - ./back_products:/app
 
-  db:
-    container_name: db
+  db_users:
+    container_name: db_users
     image: postgres:12
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=users
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -36,20 +59,62 @@ services:
       - net
     volumes:
       - ./db:/var/lib/postgresql/data
-
-  web:
-    container_name: reguserfront
-    image: node:lts-slim
+  
+  db_products:
+    container_name: db_products
+    image: postgres:12
+    environment:
+      - POSTGRES_DB=products
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
+      - "5431:5432"
+    restart: always
+    networks:
+      - net
+    volumes:
+      - ./db_products:/var/lib/postgresql/data
+
+  front_accounts:
+    container_name: front_accounts
+    image: node:lts-slim
+    ports: 
       - "3000:3000"
     tty: true
     restart: always
     depends_on:
-      - regback
+      - back_accounts
     networks:
       - net
     volumes:
-      - ./front:/app
+      - ./front_accounts:/app
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - net
+    ports:
+      - 2181:2181
+    
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    networks:
+      - net
+    ports:
+      - 9092:9092
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 volumes:
   pgdata: {}

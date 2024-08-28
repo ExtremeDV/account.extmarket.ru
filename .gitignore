@@ -1,4 +1,5 @@
 db
+db_products
 .nuxt
 node_modules
 .DS_Store
