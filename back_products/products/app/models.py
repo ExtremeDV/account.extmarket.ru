@@ -28,10 +28,7 @@ class BaseModel(models.Model):
     adwords = models.BooleanField(default=False, verbose_name='Реклама')
     adwords_start = models.DateTimeField(null=True, blank=True, verbose_name='Дата начала рекламы')
     adwords_end = models.DateTimeField(null=True, blank=True, verbose_name='Дата окончания рекламы')
-    premium = models.BooleanField(default=False, verbose_name='Премиум')
-    premium_start = models.DateTimeField(null=True, blank=True, verbose_name='Дата начала премиума')
-    premium_end = models.DateTimeField(null=True, blank=True, verbose_name='Дата окончания премиума')
-    show = models.BooleanField(default=True, verbose_name='Показывать')
+    
 
     class Meta:
         abstract = True
@@ -276,3 +273,4 @@ class Certificates(models.Model):
         verbose_name_plural = 'Сертификаты'
     def __str__(self):
         return self.number
+    
